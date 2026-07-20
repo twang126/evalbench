@@ -189,6 +189,7 @@ reporting:
 | `generator` | Yes | Must be `agy_cli` |
 | `model` | Optional | Model for the run -- either the UI label (`"Gemini 3.1 Pro (High)"`) or the full slug (`gemini-3.1-pro-high`), both listed by `agy models`. An unrecognized value fails the run. Omit to use agy's default. |
 | `timeout` | Optional | Timeout duration string, e.g. `"20m"`. Passed via the `--print-timeout` flag. If omitted, defaults to agy's internal default (5 minutes). |
+| `prompt_timeout_seconds` | Optional | Timeout limit in seconds for each CLI prompt turn (e.g., `180`). |
 | `env` | Optional | Environment variables passed to the CLI process |
 | `setup` | Optional | Tool setup block containing `mcp_servers`, `skills`, or `fake_mcp_servers` |
 

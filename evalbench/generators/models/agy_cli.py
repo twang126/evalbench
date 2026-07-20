@@ -1,4 +1,4 @@
-from .agent_cli import AgentCliGenerator
+from .agent_cli import AgentCliGenerator, process_timeout
 from .tool_naming import canonicalize_agy_tool_name, parse_agy_mcp_tool_call
 import subprocess
 import os
@@ -21,12 +21,13 @@ AGY_INSTALL_URL = "https://antigravity.google/cli/install.sh"
 
 
 class CLICommand:
-    def __init__(self, cli, prompt, env=None, resume=False, cwd=None):
+    def __init__(self, cli, prompt, env=None, resume=False, cwd=None, timeout=None):
         self.cli = cli
         self.prompt = prompt
         self.env = env if env else {}
         self.resume = resume
         self.cwd = cwd
+        self.timeout = timeout
 
 
 class AgyCliGenerator(AgentCliGenerator):
@@ -792,17 +793,27 @@ class AgyCliGenerator(AgentCliGenerator):
         return self._run_agy_cli(cli_cmd)
 
     def _execute_cli_command(
-        self, command, env=None, cwd=None
+        self, command, env=None, cwd=None, timeout=None
     ) -> subprocess.CompletedProcess:
         try:
-            return subprocess.run(
+            proc = subprocess.Popen(
                 command,
-                stdin=subprocess.DEVNULL, capture_output=True,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
-                check=False,
                 env=env,
                 cwd=cwd if cwd else self.fake_home,
+                start_new_session=True,
             )
+            with process_timeout(proc, timeout) as is_timed_out:
+                stdout, stderr = proc.communicate()
+
+            if is_timed_out():
+                stderr = (stderr + "\n" if stderr else "") + f"Error: Command timed out after {timeout} seconds."
+                return subprocess.CompletedProcess(command, 124, stdout or "", stderr)
+
+            return subprocess.CompletedProcess(command, proc.returncode, stdout or "", stderr)
         except FileNotFoundError:
             return subprocess.CompletedProcess(
                 command, 127, "", f"Error: Command not found: {command[0]}"
@@ -821,10 +832,10 @@ class AgyCliGenerator(AgentCliGenerator):
         command = self._base_agy_command(
             self.agy_bin, cli_cmd.prompt, cli_cmd.resume, self.model,
             output_format="stream-json", log_file=self.cli_log_path,
-            timeout=self.timeout,
+            timeout=cli_cmd.timeout or self.timeout,
         )
         cwd = cli_cmd.cwd if cli_cmd.cwd else self.fake_home
-        result = self._execute_cli_command(command, env=env, cwd=cwd)
+        result = self._execute_cli_command(command, env=env, cwd=cwd, timeout=cli_cmd.timeout or self.timeout)
 
         # Parse whenever agy emitted a stream, even on a non-zero exit: a
         # timed-out/errored run still ends in a ``result`` event carrying real
@@ -1132,7 +1143,7 @@ class AgyCliGenerator(AgentCliGenerator):
 
     def create_command(
         self, cli: str, prompt: str, env: dict = None, resume: bool = False,
-        session_id: str = None, cwd: str = None,
+        session_id: str = None, cwd: str = None, timeout: float | int = None,
     ) -> CLICommand:
         # The executable is always this session's sandbox binary
         # (self.agy_bin); the ``cli`` argument -- the agent_version label "agy"
@@ -1142,4 +1153,4 @@ class AgyCliGenerator(AgentCliGenerator):
         # environment are layered in once at invocation time by
         # ``_run_agy_cli`` via ``_merged_env``.
         return CLICommand(cli=self.agy_bin, prompt=prompt, env=env or {},
-                          resume=resume, cwd=cwd)
+                          resume=resume, cwd=cwd, timeout=timeout)

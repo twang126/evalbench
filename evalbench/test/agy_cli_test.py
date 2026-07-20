@@ -48,11 +48,24 @@ def skip_agy_install(request):
 
 @pytest.fixture
 def mock_run():
-    """Patches the generator's ``subprocess.run`` with a success-by-default
+    """Patches the generator's ``subprocess.run`` and ``subprocess.Popen`` with a success-by-default
     mock. Tests needing custom behavior set ``side_effect``."""
-    with patch("generators.models.agy_cli.subprocess.run") as m:
-        m.return_value = MagicMock(returncode=0, stdout="", stderr="")
-        yield m
+    with patch("generators.models.agy_cli.subprocess.run") as m_run, \
+         patch("generators.models.agy_cli.subprocess.Popen") as m_popen:
+        m_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        def popen_side_effect(*args, **kwargs):
+            res = m_run(*args, **kwargs)
+            proc = MagicMock()
+            proc.pid = 12345
+            proc.returncode = getattr(res, "returncode", 0) if not isinstance(getattr(res, "returncode", 0), MagicMock) else 0
+            stdout = res.stdout if isinstance(getattr(res, "stdout", None), str) else ""
+            stderr = res.stderr if isinstance(getattr(res, "stderr", None), str) else ""
+            proc.communicate.return_value = (stdout, stderr)
+            return proc
+
+        m_popen.side_effect = popen_side_effect
+        yield m_run
 
 
 def _install_calls(mock_run):
