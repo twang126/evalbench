@@ -4,26 +4,9 @@ import json
 import argparse
 import pandas as pd
 
+from paths import get_results_dir
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-def get_results_dir():
-    # Try to read from environment variable
-    res_dir = os.environ.get("RESULTS_DIR")
-    if res_dir:
-        return res_dir
-        
-    # Check multiple locations for results directory
-    results_dir_candidates = [
-        "/tmp_session_files/results",
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "results"),
-        os.path.join(os.getcwd(), "results"),
-    ]
-
-    for candidate in results_dir_candidates:
-        if os.path.exists(candidate) and os.path.isdir(candidate):
-            return candidate
-
-    return results_dir_candidates[1]  # Fallback to default
 
 
 def process_directory(d, results_dir):
