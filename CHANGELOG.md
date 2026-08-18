@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.16.0](https://github.com/GoogleCloudPlatform/evalbench/compare/v1.15.0...v1.16.0) (2026-08-18)
+
+
+### Features
+
+* **dataset-quality:** count skills in trajectory coverage ([#568](https://github.com/GoogleCloudPlatform/evalbench/issues/568)) ([2768d7c](https://github.com/GoogleCloudPlatform/evalbench/commit/2768d7c41f3d7634ada08b56d218a7bc88c26e89))
+* **evalbench:** add native Agent Runtime generator support and deployment guide ([f022fea](https://github.com/GoogleCloudPlatform/evalbench/commit/f022fea5a930d3c8f5d7592e612e25e296d5cfe1))
+* **query_data_api:** capture pipeline_debug_info in eval reports via REST ([7135ce0](https://github.com/GoogleCloudPlatform/evalbench/commit/7135ce09d1e5053b11a2f80f9d228737c69768c8))
+* **query_data_api:** capture pipeline_debug_info in eval reports via REST ([beeae53](https://github.com/GoogleCloudPlatform/evalbench/commit/beeae53c2dee653e65fc7788b3b3faf4abe4146d))
+* **scorers:** pass config dictionary and runtime kwargs to pythonscorer script input ([ba0136e](https://github.com/GoogleCloudPlatform/evalbench/commit/ba0136ea24bf21d8e916b4f809e6bd1872964635))
+* support generated and default columns in Spanner database driver ([cc70805](https://github.com/GoogleCloudPlatform/evalbench/commit/cc708051392d0c803681a0861e0f28f44ca19ff9))
+
+
+### Bug Fixes
+
+* **examples:** fix Jupyter Notebook JSON schema validation errors and update title ([5e6d03d](https://github.com/GoogleCloudPlatform/evalbench/commit/5e6d03d49762c21d5fa6e200f4b0c2afc7ac68ed))
+* **examples:** update notebook title and repair schema validation errors ([0f962c1](https://github.com/GoogleCloudPlatform/evalbench/commit/0f962c1ba35a32767f101ccf1f64a8bb8b575f93))
+* Replace Spanner column slicing with explicit synthetic column exclusion ([abe01c9](https://github.com/GoogleCloudPlatform/evalbench/commit/abe01c9d25187550eeef77e15c118e6c934137b5))
+
 ## [1.15.0](https://github.com/GoogleCloudPlatform/evalbench/compare/v1.14.0...v1.15.0) (2026-08-11)
 
 
